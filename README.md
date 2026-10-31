@@ -61,9 +61,8 @@ evaluation), several seeds.
 
 The core of the project was implemented by me (Sergei Usanov): the EGNN layer and vector field, the flow matching
 loss and prior, the DW4 energy, the training loop, the ODE sampling, minibatch OT, the Hungarian/Kabsch alignment
-and equivariant OT. I used Claude (Anthropic) as a coding assistant: it reviewed and debugged my code, explained
-parts of the paper, wrote the tests, the data download/conversion, plotting, the MLP baseline, the vectorized
-equivariant OT for DW4, the experiment and evaluation scripts, and this README.
+and equivariant OT. I used Claude (Anthropic) as a coding assistant for code review and debugging and assisting with
+routine implementation, testing, data processing, visualization, documentation and this README.
 
 ## Reference
 
