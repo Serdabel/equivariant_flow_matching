@@ -1,0 +1,10 @@
+# private development notebooks (contain tutoring notes)
+dev/
+# data is downloaded by scripts/prepare_dw4.py
+data/
+# large artifacts
+results/*/model.pt
+results/logs/
+__pycache__/
+.pytest_cache/
+.ipynb_checkpoints/

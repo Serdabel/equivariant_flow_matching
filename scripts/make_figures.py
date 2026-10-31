@@ -81,7 +81,7 @@ def fig_nfe(runs):
     ax.set_xlabel("Euler steps (= function evaluations)")
     ax.set_ylabel("$W_1$(energy of samples, energy of data)")
     ax.set_title("Sample quality vs. number of integration steps (lower is better)", loc="left")
-    ax.legend(ncol=2, fontsize=8)
+    ax.legend(ncol=2, fontsize=8, handlelength=4.5, handletextpad=0.8)
     fig.tight_layout()
     fig.savefig(os.path.join(RESULTS, "fig_nfe.png"), dpi=200)
 

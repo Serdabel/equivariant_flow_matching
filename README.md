@@ -9,12 +9,31 @@ on the DW4 many-body system (4 particles in 2D, double-well pair potential).
   (pairs aligned over permutations and rotations before matching).
 
 All 2 × 3 combinations are trained with the same loss, data and schedule, and compared on sample quality,
-transport path length, integration cost (NFE) and equivariance of the learned flow.
+integration cost (NFE) and equivariance of the learned flow.
 
 ## Results
 
-*To be filled from `results/summary.md` after the full run.* Figures: `results/fig_distributions.png`,
-`results/fig_nfe.png`.
+**Single-seed DW4 ablation:** 100k training configurations, 400 epochs, 10k evaluation samples.
+
+* **Architecture vs. coupling:** at **4 Euler steps**, this ablation **showed a larger benefit from
+  equivariant architecture than equivariant OT coupling**: energy W₁ is **25.41 → 3.51** when replacing
+  MLP with EGNN under independent coupling, versus **25.41 → 8.32** when adding equivariant OT to MLP.
+  Combining EGNN and equivariant OT gives the lowest error at this budget (**0.90**).
+* **Adaptive-solver quality:** with adaptive integration, EGNN achieves energy-distribution Wasserstein-1
+  errors of **0.070–0.256**, versus **6.364–10.811** for a parameter-matched MLP.
+* **Integration budget:** for EGNN, OT reduces energy error at **4 Euler steps from 3.51 to 1.09**
+  (equivariant OT: **0.90**). At a target error of **W₁ ≤ 0.5**, OT needs **8 tested Euler steps**,
+  versus **16** for independent coupling.
+* **Trade-off:** equivariant OT helps at very low step counts but does not improve adaptive-solver
+  quality for EGNN (**0.256**, versus **0.070** with independent coupling).
+
+[Results notebook](notebooks/results.ipynb) — executed, with tables and figures; no retraining or dataset download needed.
+
+![Sample quality versus integration budget](results/fig_nfe.png)
+
+These observations concern quality at a fixed integration budget, or steps to a fixed quality target;
+trajectory straightness was not measured. One seed only; equivariant OT reuses 10 precomputed pair sets,
+while the other couplings use fresh noise. Energy and distance marginals do not establish full distributional agreement.
 
 ## Repository
 
@@ -31,6 +50,7 @@ scripts/
   precompute_eq_ot.py equivariant-OT pairs, computed once before training (as in App. C.4 of the paper)
   run_experiment.py   train + evaluate one configuration
   make_figures.py     figures and summary table
+notebooks/results.ipynb executed results walkthrough
 tests/                equivariance tests of the EGNN; tests of OT, Kabsch, alignment and equivariant OT
 run_all.sh            the full experiment (6 configurations in parallel on CPU)
 ```
@@ -40,6 +60,7 @@ run_all.sh            the full experiment (6 configurations in parallel on CPU)
 ```bash
 pip install -r requirements.txt
 pytest                                               # 12 tests
+mkdir -p results
 nohup bash run_all.sh > results/run_all.log 2>&1 &   # ~2 h on a 20-thread CPU
 ```
 
@@ -47,8 +68,9 @@ nohup bash run_all.sh > results/run_all.log 2>&1 &   # ~2 h on a 20-thread CPU
 
 * The training set is centered: the prior and the model live on the zero-center-of-mass subspace.
 * Equivariant OT costs ~4–10 s per batch of 256 with the per-pair loop, so pairs are precomputed
-  (10 pair sets, one per epoch). For DW4 the per-pair Hungarian step is replaced by an exact search over all
-  4! permutations (`eq_ot_coupling_bruteforce`), tested to give the same result as the loop version.
+  (10 pair sets, cycled across epochs). For DW4 the per-pair Hungarian step is replaced by a search over all
+  4! permutations before Kabsch rotation (`eq_ot_coupling_bruteforce`), tested against the loop version.
+  This sequential alignment is not a joint optimum over permutations and rotations.
 * `torchdyn` 1.0.6 `rk4` evaluates time-dependent vector fields at shifted stage times
   (`c[0..2]` instead of `c[1..3]`); `torchdiffeq` is used instead.
 
